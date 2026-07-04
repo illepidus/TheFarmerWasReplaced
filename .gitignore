@@ -1,0 +1,9 @@
+**/.idea
+Backup
+Themes
+Saves/**/save.json
+*.iml
+*.vdf
+options.txt
+output.txt
+Player.log
