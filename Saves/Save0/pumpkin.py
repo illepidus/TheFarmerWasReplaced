@@ -30,7 +30,7 @@ def _find_min(field):
 
     return min_x, min_y, min_v
 
-def cycle(x0 = 0, y0 = 0, s = 6):
+def cycle(x0 = 0, y0 = 0, s=min(6, get_world_size())):
     change_hat(Hats.Pumpkin_Hat)
 
     field, next_v = _init(s)
