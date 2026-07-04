@@ -1,10 +1,12 @@
 **/.idea
-**/.DS_Store
 Backup
 Themes
+
+**/.DS_Store
+**/*.iml
+**/*.vdf
 Saves/**/save.json
-*.iml
-*.vdf
+
 options.txt
 output.txt
 Player.log
