@@ -1,5 +1,6 @@
 from __builtins__ import *
 import move
+import water
 
 def _init(size):
     field = []
@@ -29,11 +30,6 @@ def _find_min(field):
 
     return min_x, min_y, min_v
 
-def _water():
-    while get_water() <= 0.75:
-        if not use_item(Items.Water):
-            break
-
 def cycle(x0 = 0, y0 = 0, s = 6):
     change_hat(Hats.Pumpkin_Hat)
 
@@ -51,14 +47,14 @@ def cycle(x0 = 0, y0 = 0, s = 6):
 
         if get_entity_type() != Entities.Pumpkin: # dead pumpkin / not a pumpkin
             harvest()
-            _water()
+            water.apply()
             plant(Entities.Pumpkin)
             field[y][x] = next_v
             next_v += 1
         elif can_harvest(): # nice! this pumpkin is nice and grown lets forget about it
             field[y][x] = 0
         else: # still not grown pumpkin, let's move to next one
-            _water()
+            water.apply()
             field[y][x] = next_v
             next_v += 1
 
