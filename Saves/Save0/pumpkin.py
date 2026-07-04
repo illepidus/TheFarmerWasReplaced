@@ -63,6 +63,3 @@ def cycle(x0 = 0, y0 = 0, s = 6):
             next_v += 1
 
     harvest()
-
-while True:
-    cycle()
