@@ -1,6 +1,7 @@
 from __builtins__ import *
 import move
 
+
 def cycle():
     change_hat(Hats.Dinosaur_Hat)
     while True:

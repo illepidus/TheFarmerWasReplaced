@@ -2,6 +2,7 @@ from __builtins__ import *
 import move
 import water
 
+
 def cycle(x0=0, y0=0, s=min(8, get_world_size())):
     change_hat(Hats.Cactus_Hat)
     for x in range(s):

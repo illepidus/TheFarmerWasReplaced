@@ -1,5 +1,6 @@
 from __builtins__ import *
 
+
 # noinspection PyTypeChecker
 def measure(action):
     before = {}

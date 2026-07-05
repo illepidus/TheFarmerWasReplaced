@@ -24,13 +24,15 @@ def _to(get_pos_f, dec_direction, inc_direction, target_pos, snake_mode):
     return True
 
 
-def to(x, y, snake_mode = False):
+def to(x, y, snake_mode=False):
     x_res = _to(get_pos_x, West, East, x, snake_mode)
     y_res = _to(get_pos_y, South, North, y, snake_mode)
     return x_res and y_res
 
+
 def snake(x, y):
     return to(x, y, True)
+
 
 def brush(f=_noop, x0=0, y0=0, x1=get_world_size(), y1=get_world_size()):
     if min(x0, y0, x1, y1) < 0:
