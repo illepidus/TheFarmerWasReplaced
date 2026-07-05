@@ -4,16 +4,16 @@ def cycle(s=get_world_size()):
     clear()
     plant(Entities.Bush)
 
-    gold_before = num_items(Items.Gold)
+    gold = num_items(Items.Gold)
 
     substance = s * 2**(num_unlocked(Unlocks.Mazes) - 1)
     use_item(Items.Weird_Substance, substance)
 
-    def shadow(gold0=gold_before):
-        walk_left_hand(South, gold0)
+    def shadow(before=gold):
+        walk_hand(North, False, before) # right hand
 
     spawn_drone(shadow)
-    walk_left_hand(North, gold_before)
+    walk_hand(North, True, gold) # left hand
 
 def left_of(d):
     if d == North:
@@ -42,25 +42,27 @@ def back_of(d):
         return West
     return East
 
-def walk_left_hand(direction, gold0):
+def walk_hand(direction, left_hand, gold0):
     while num_items(Items.Gold) == gold0:
         if get_entity_type() == Entities.Treasure:
             harvest()
             return True
 
-        left = left_of(direction)
+        if left_hand:
+            first = left_of(direction)
+            third = right_of(direction)
+        else:
+            first = right_of(direction)
+            third = left_of(direction)
 
-        if move(left):
-            direction = left
+        if move(first):
+            direction = first
         elif move(direction):
             pass
+        elif move(third):
+            direction = third
         else:
-            right = right_of(direction)
-
-            if move(right):
-                direction = right
-            else:
-                direction = back_of(direction)
-                move(direction)
+            direction = back_of(direction)
+            move(direction)
 
     return False
