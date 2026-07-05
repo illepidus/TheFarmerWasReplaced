@@ -1,18 +1,19 @@
 from __builtins__ import *
 
-def cycle(s=get_world_size(), budget=2**num_unlocked(Unlocks.Megafarm)):
+def cycle(s=get_world_size()):
     clear()
-    plant(Entities.Bush)
     change_hat(Hats.Purple_Hat)
 
     gold0 = num_items(Items.Gold)
 
+    scatter_drones(s, gold0)
+
+    plant(Entities.Bush)
+
     substance = s * 2**(num_unlocked(Unlocks.Mazes) - 1)
     use_item(Items.Weird_Substance, substance)
 
-    spawned_cells = []
-
-    walk_branching_left(North, gold0, budget - 1, spawned_cells, s)
+    walk_left(North, gold0, s)
 
 def left_of(d):
     if d == North:
@@ -41,81 +42,142 @@ def back_of(d):
         return West
     return East
 
-def plan_for(direction):
-    return [
-        left_of(direction),
-        direction,
-        right_of(direction),
-    ]
+def direction_for(i):
+    r = i % 4
 
-def cell_id(s):
-    return get_pos_x() * s + get_pos_y()
+    if r == 0:
+        return North
+    if r == 1:
+        return East
+    if r == 2:
+        return South
 
-def contains(items, value):
-    for item in items:
-        if item == value:
-            return True
+    return West
 
-    return False
+def ceil_sqrt(n):
+    r = 1
 
-def spawn_left_branch(first_direction, gold0, s):
-    def worker(
-            direction0=first_direction,
-            gold_before=gold0,
-            world_size=s
-    ):
-        if num_items(Items.Gold) != gold_before:
-            return
+    while r * r < n:
+        r = r + 1
 
-        # Первый шаг принудительный:
-        # ребёнок уходит именно в ветку, которую родитель не выбрал.
-        if not move(direction0):
-            return
+    return r
 
-        if get_entity_type() == Entities.Treasure:
-            harvest()
-            return
+def go_to(tx, ty, s):
+    # Важно: не используем wrap через край мира.
+    # Двигаемся только внутри квадрата 0..s-1.
 
-        # Дети никого не рожают.
-        walk_branching_left(direction0, gold_before, 0, [], world_size)
+    while get_pos_x() < tx:
+        move(East)
 
-    spawn_drone(worker)
+    while get_pos_x() > tx:
+        move(West)
 
-def walk_branching_left(direction, gold0, children_left, spawned_cells, s):
+    while get_pos_y() < ty:
+        move(North)
+
+    while get_pos_y() > ty:
+        move(South)
+
+def can_go(direction, s):
+    x = get_pos_x()
+    y = get_pos_y()
+
+    if direction == East and x >= s - 1:
+        return False
+
+    if direction == West and x <= 0:
+        return False
+
+    if direction == North and y >= s - 1:
+        return False
+
+    if direction == South and y <= 0:
+        return False
+
+    return can_move(direction)
+
+def walk_left(direction, gold0, s):
     while num_items(Items.Gold) == gold0:
         if get_entity_type() == Entities.Treasure:
             harvest()
             return True
 
-        open_dirs = []
+        left = left_of(direction)
+        right = right_of(direction)
 
-        for d in plan_for(direction):
-            if can_move(d):
-                open_dirs.append(d)
-
-        if len(open_dirs) == 0:
-            direction = back_of(direction)
+        if can_go(left, s):
+            move(left)
+            direction = left
+        elif can_go(direction, s):
             move(direction)
+        elif can_go(right, s):
+            move(right)
+            direction = right
         else:
-            main_direction = open_dirs[0]
+            direction = back_of(direction)
 
-            # Спавним детей только если:
-            # - есть альтернативные проходы;
-            # - остался лимит детей;
-            # - в этой клетке ещё не спавнили.
-            if len(open_dirs) > 1 and children_left > 0:
-                cell = cell_id(s)
-
-                if not contains(spawned_cells, cell):
-                    spawned_cells.append(cell)
-
-                    i = 1
-                    while i < len(open_dirs) and children_left > 0:
-                        spawn_left_branch(open_dirs[i], gold0, s)
-                        children_left = children_left - 1
-                        i = i + 1
-
-            move(main_direction)
-            direction = main_direction
+            if can_go(direction, s):
+                move(direction)
+            else:
+                return False
 
     return False
+
+def scatter_drones(s, gold0):
+    spawn_count = max_drones() - 1
+
+    # Нет смысла пытаться занять больше разных стартовых клеток,
+    # чем есть в квадрате s*s. Одну клетку оставляем основному дрону.
+    max_spawn_count = s * s - 1
+
+    if spawn_count > max_spawn_count:
+        spawn_count = max_spawn_count
+
+    if spawn_count <= 0:
+        return
+
+    cols = ceil_sqrt(spawn_count)
+    rows = (spawn_count + cols - 1) // cols
+
+    spawned = 0
+    row = 0
+
+    while row < rows and spawned < spawn_count:
+        if row % 2 == 0:
+            col = 0
+
+            while col < cols and spawned < spawn_count:
+                spawned = scatter_one(row, col, rows, cols, spawned, gold0, s)
+                col = col + 1
+        else:
+            col = cols - 1
+
+            while col >= 0 and spawned < spawn_count:
+                spawned = scatter_one(row, col, rows, cols, spawned, gold0, s)
+                col = col - 1
+
+        row = row + 1
+
+def scatter_one(row, col, rows, cols, spawned, gold0, s):
+    # Центр сектора сетки.
+    x = ((2 * col + 1) * s) // (2 * cols)
+    y = ((2 * row + 1) * s) // (2 * rows)
+
+    # Теоретически для маленьких s можно попасть в 0,0.
+    # Там потом будет основной дрон, так что эту точку пропускаем.
+    if x == 0 and y == 0:
+        return spawned
+
+    go_to(x, y, s)
+
+    drone = spawn_drone(
+        walk_left,
+        direction_for(spawned + 1),
+        gold0,
+        s
+    )
+
+    if drone == None:
+        return spawned
+
+    return spawned + 1
