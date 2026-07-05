@@ -6,13 +6,17 @@ def cycle(s=get_world_size()):
 
     gold0 = num_items(Items.Gold)
 
+    # Расставляем spawned-дронов до появления лабиринта.
     scatter_drones(s, gold0)
 
+    # Не возвращаемся в 0,0.
+    # Создаём лабиринт там, где главный дрон оказался после расстановки.
     plant(Entities.Bush)
 
     substance = s * 2**(num_unlocked(Unlocks.Mazes) - 1)
     use_item(Items.Weird_Substance, substance)
 
+    # Главный дрон тоже участвует из текущей позиции.
     walk_left(North, gold0, s)
 
 def left_of(d):
@@ -62,10 +66,7 @@ def ceil_sqrt(n):
 
     return r
 
-def go_to(tx, ty, s):
-    # Важно: не используем wrap через край мира.
-    # Двигаемся только внутри квадрата 0..s-1.
-
+def go_to(tx, ty):
     while get_pos_x() < tx:
         move(East)
 
@@ -124,51 +125,54 @@ def walk_left(direction, gold0, s):
     return False
 
 def scatter_drones(s, gold0):
-    spawn_count = max_drones() - 1
+    # Всего хотим использовать до max_drones().
+    # Один дрон — текущий, поэтому spawn'им максимум max_drones() - 1.
+    spawn_limit = max_drones() - 1
 
-    # Нет смысла пытаться занять больше разных стартовых клеток,
-    # чем есть в квадрате s*s. Одну клетку оставляем основному дрону.
-    max_spawn_count = s * s - 1
+    # Не больше, чем клеток кроме текущей.
+    max_by_field = s * s - 1
 
-    if spawn_count > max_spawn_count:
-        spawn_count = max_spawn_count
+    if spawn_limit > max_by_field:
+        spawn_limit = max_by_field
 
-    if spawn_count <= 0:
+    if spawn_limit <= 0:
         return
 
-    cols = ceil_sqrt(spawn_count)
-    rows = (spawn_count + cols - 1) // cols
+    # Квадратная сетка k x k, потому что поле s x s.
+    #
+    # Для 32 дронов:
+    # spawned = 31
+    # k = 6
+    # точки будут лежать примерно в центрах 6x6 секторов.
+    k = ceil_sqrt(spawn_limit + 1)
 
     spawned = 0
     row = 0
 
-    while row < rows and spawned < spawn_count:
+    while row < k and spawned < spawn_limit:
         if row % 2 == 0:
             col = 0
 
-            while col < cols and spawned < spawn_count:
-                spawned = scatter_one(row, col, rows, cols, spawned, gold0, s)
+            while col < k and spawned < spawn_limit:
+                spawned = scatter_one(row, col, k, spawned, gold0, s)
                 col = col + 1
         else:
-            col = cols - 1
+            col = k - 1
 
-            while col >= 0 and spawned < spawn_count:
-                spawned = scatter_one(row, col, rows, cols, spawned, gold0, s)
+            while col >= 0 and spawned < spawn_limit:
+                spawned = scatter_one(row, col, k, spawned, gold0, s)
                 col = col - 1
 
         row = row + 1
 
-def scatter_one(row, col, rows, cols, spawned, gold0, s):
-    # Центр сектора сетки.
-    x = ((2 * col + 1) * s) // (2 * cols)
-    y = ((2 * row + 1) * s) // (2 * rows)
+def scatter_one(row, col, k, spawned, gold0, s):
+    # Центр сектора квадратной сетки.
+    x = ((2 * col + 1) * s) // (2 * k)
+    y = ((2 * row + 1) * s) // (2 * k)
 
-    # Теоретически для маленьких s можно попасть в 0,0.
-    # Там потом будет основной дрон, так что эту точку пропускаем.
-    if x == 0 and y == 0:
-        return spawned
-
-    go_to(x, y, s)
+    # Если сектор попал в текущую/стартовую клетку, можно всё равно спавнить:
+    # это не критично, но обычно для s=31 и k>=2 сюда не попадём.
+    go_to(x, y)
 
     drone = spawn_drone(
         walk_left,
