@@ -6,10 +6,15 @@ def cycle(s=get_world_size()):
 
     gold0 = num_items(Items.Gold)
 
-    # До появления лабиринта расставляем дронов.
-    # Spawned-дроны НЕ ходят, а ждут measure() != None.
-    # Последняя точка раскладки остаётся мастеру.
-    scatter_drones(s, gold0)
+    # plan = [master_x, master_y, ready_tick]
+    # Дети уже заспавнены и едут к своим точкам.
+    plan = spawn_positioned_drones(s, gold0)
+
+    # Мастер едет в свою, ближнюю, точку раскладки.
+    go_to(plan[0], plan[1])
+
+    # Ждём, пока дальние дети точно доедут.
+    wait_until_tick(plan[2], gold0)
 
     # Лабиринт появляется здесь.
     plant(Entities.Bush)
@@ -17,18 +22,27 @@ def cycle(s=get_world_size()):
     substance = s * 2**(num_unlocked(Unlocks.Mazes) - 1)
     use_item(Items.Weird_Substance, substance)
 
-    # Мастер тоже участвует из своей текущей позиции.
+    # Мастер тоже участвует из своей точки.
     walk_left(North, gold0, s)
 
-def wait_maze_and_walk(direction, gold0, s):
-    # До появления лабиринта spawned-дрон стоит на своей точке.
-    # measure() внутри maze возвращает позицию treasure,
-    # а до maze здесь ожидаем None.
+def wait_maze_and_walk(tx, ty, direction, gold0, s):
+    # Spawned-дрон сам едет к своей точке.
+    # До появления лабиринта поле свободное.
+    go_to(tx, ty)
+
+    # Стоим на месте до появления maze.
+    # В maze measure() возвращает позицию treasure.
     while measure() == None:
-        if num_items(Items.Gold) != gold0:
-            return False
+        pass
 
     return walk_left(direction, gold0, s)
+
+def wait_until_tick(target_tick, gold0):
+    while get_tick_count() < target_tick:
+        # Дешёвое действие на 1 tick.
+        # Заодно безопасный выход, если gold уже изменился.
+        if num_items(Items.Gold) != gold0:
+            return
 
 def left_of(d):
     if d == North:
@@ -80,6 +94,22 @@ def ceil_sqrt(n):
 def points_in_row(row, rows, total):
     return ((row + 1) * total) // rows - (row * total) // rows
 
+def point_x(index_in_row, count_in_row, s):
+    return ((2 * index_in_row + 1) * s) // (2 * count_in_row)
+
+def point_y(row, rows, s):
+    return ((2 * row + 1) * s) // (2 * rows)
+
+def point_id(x, y, s):
+    return x * s + y
+
+def contains(items, value):
+    for item in items:
+        if item == value:
+            return True
+
+    return False
+
 def go_to(tx, ty):
     x = get_pos_x()
 
@@ -100,12 +130,6 @@ def go_to(tx, ty):
     while y > ty:
         move(South)
         y = y - 1
-
-def go_to_point(row, index_in_row, rows, count_in_row, s):
-    y = ((2 * row + 1) * s) // (2 * rows)
-    x = ((2 * index_in_row + 1) * s) // (2 * count_in_row)
-
-    go_to(x, y)
 
 def inside(direction, x, y, s):
     if direction == East:
@@ -134,9 +158,8 @@ def walk_left(direction, gold0, s):
         x = get_pos_x()
         y = get_pos_y()
 
-        # Здесь intentionally НЕ делаем can_move() перед move().
-        # move() сам дешево вернёт False, если упёрлись в стену,
-        # а на успешном ходе не платим лишний tick за can_move().
+        # Не делаем can_move() перед move():
+        # успешный move и так дорогой, а неуспешный move дешёвый.
         if inside(left, x, y, s) and move(left):
             direction = left
         elif inside(direction, x, y, s) and move(direction):
@@ -153,55 +176,123 @@ def walk_left(direction, gold0, s):
 
     return False
 
-def scatter_drones(s, gold0):
+def total_drones_for_field(s):
     total = max_drones()
 
     if total > s * s:
         total = s * s
 
-    if total <= 1:
-        return
+    return total
 
-    rows = ceil_sqrt(total)
+def find_nearest_target(s, total, rows):
+    best_x = 0
+    best_y = 0
+    best_dist = 999999
 
-    placed = 0
     row = 0
 
-    while row < rows and placed < total:
+    while row < rows:
         count = points_in_row(row, rows, total)
+        i = 0
 
-        if row % 2 == 0:
-            i = 0
+        while i < count:
+            x = point_x(i, count, s)
+            y = point_y(row, rows, s)
+            dist = x + y
 
-            while i < count and placed < total:
-                go_to_point(row, i, rows, count, s)
-                placed = place_drone_or_master(placed, total, gold0, s)
-                i = i + 1
-        else:
-            i = count - 1
+            if dist < best_dist:
+                best_dist = dist
+                best_x = x
+                best_y = y
 
-            while i >= 0 and placed < total:
-                go_to_point(row, i, rows, count, s)
-                placed = place_drone_or_master(placed, total, gold0, s)
-                i = i - 1
+            i = i + 1
 
         row = row + 1
 
-def place_drone_or_master(placed, total, gold0, s):
-    # Последняя точка остаётся мастеру.
-    if placed == total - 1:
-        return total
+    return [best_x, best_y]
 
-    drone = spawn_drone(
-        wait_maze_and_walk,
-        direction_for(placed + 1),
-        gold0,
-        s
-    )
+def spawn_positioned_drones(s, gold0):
+    start_tick = get_tick_count()
 
-    # Если игра не дала spawned-дрона,
-    # текущая точка становится мастерской.
-    if drone == None:
-        return total
+    total = total_drones_for_field(s)
 
-    return placed + 1
+    if total <= 1:
+        return [0, 0, start_tick]
+
+    rows = ceil_sqrt(total)
+
+    # Мастер берёт ближайшую точку из той же равномерной раскладки.
+    master_target = find_nearest_target(s, total, rows)
+    master_x = master_target[0]
+    master_y = master_target[1]
+
+    child_count = total - 1
+    spawned = 0
+    spawned_ids = []
+
+    # Абсолютный tick, когда все дети должны быть на местах.
+    ready_tick = start_tick
+
+    # Дальние точки отдаём детям первыми:
+    # каждый следующий spawn задержан на 200 ticks,
+    # поэтому дальним детям нужна фора.
+    while spawned < child_count:
+        best_x = 0
+        best_y = 0
+        best_id = -1
+        best_dist = -1
+
+        row = 0
+
+        while row < rows:
+            count = points_in_row(row, rows, total)
+            i = 0
+
+            while i < count:
+                x = point_x(i, count, s)
+                y = point_y(row, rows, s)
+                pid = point_id(x, y, s)
+
+                if not (x == master_x and y == master_y) and not contains(spawned_ids, pid):
+                    dist = x + y
+
+                    if dist > best_dist:
+                        best_dist = dist
+                        best_x = x
+                        best_y = y
+                        best_id = pid
+
+                i = i + 1
+
+            row = row + 1
+
+        if best_id == -1:
+            return [master_x, master_y, ready_tick]
+
+        spawned_ids.append(best_id)
+
+        drone = spawn_drone(
+            wait_maze_and_walk,
+            best_x,
+            best_y,
+            direction_for(spawned + 1),
+            gold0,
+            s
+        )
+
+        if drone == None:
+            return [master_x, master_y, ready_tick]
+
+        # Оценка:
+        # spawned+1 успешных spawn_drone по 200 ticks,
+        # потом ребёнок едет best_dist шагов по 200 ticks.
+        #
+        # +10 — маленький запас на get_pos_x/get_pos_y/measure.
+        child_ready_tick = start_tick + (spawned + 1 + best_dist) * 200 + 10
+
+        if child_ready_tick > ready_tick:
+            ready_tick = child_ready_tick
+
+        spawned = spawned + 1
+
+    return [master_x, master_y, ready_tick]
