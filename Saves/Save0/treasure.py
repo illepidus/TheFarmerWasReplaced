@@ -5,14 +5,30 @@ def cycle(s=get_world_size()):
     change_hat(Hats.Purple_Hat)
 
     gold0 = num_items(Items.Gold)
+
+    # До появления лабиринта расставляем дронов.
+    # Spawned-дроны НЕ ходят, а ждут measure() != None.
+    # Последняя точка раскладки остаётся мастеру.
     scatter_drones(s, gold0)
 
+    # Лабиринт появляется здесь.
     plant(Entities.Bush)
 
     substance = s * 2**(num_unlocked(Unlocks.Mazes) - 1)
     use_item(Items.Weird_Substance, substance)
 
+    # Мастер тоже участвует из своей текущей позиции.
     walk_left(North, gold0, s)
+
+def wait_maze_and_walk(direction, gold0, s):
+    # До появления лабиринта spawned-дрон стоит на своей точке.
+    # measure() внутри maze возвращает позицию treasure,
+    # а до maze здесь ожидаем None.
+    while measure() == None:
+        if num_items(Items.Gold) != gold0:
+            return False
+
+    return walk_left(direction, gold0, s)
 
 def left_of(d):
     if d == North:
@@ -65,17 +81,25 @@ def points_in_row(row, rows, total):
     return ((row + 1) * total) // rows - (row * total) // rows
 
 def go_to(tx, ty):
-    while get_pos_x() < tx:
+    x = get_pos_x()
+
+    while x < tx:
         move(East)
+        x = x + 1
 
-    while get_pos_x() > tx:
+    while x > tx:
         move(West)
+        x = x - 1
 
-    while get_pos_y() < ty:
+    y = get_pos_y()
+
+    while y < ty:
         move(North)
+        y = y + 1
 
-    while get_pos_y() > ty:
+    while y > ty:
         move(South)
+        y = y - 1
 
 def go_to_point(row, index_in_row, rows, count_in_row, s):
     y = ((2 * row + 1) * s) // (2 * rows)
@@ -83,23 +107,20 @@ def go_to_point(row, index_in_row, rows, count_in_row, s):
 
     go_to(x, y)
 
-def can_go(direction, s):
-    x = get_pos_x()
-    y = get_pos_y()
+def inside(direction, x, y, s):
+    if direction == East:
+        return x < s - 1
 
-    if direction == East and x >= s - 1:
-        return False
+    if direction == West:
+        return x > 0
 
-    if direction == West and x <= 0:
-        return False
+    if direction == North:
+        return y < s - 1
 
-    if direction == North and y >= s - 1:
-        return False
+    if direction == South:
+        return y > 0
 
-    if direction == South and y <= 0:
-        return False
-
-    return can_move(direction)
+    return False
 
 def walk_left(direction, gold0, s):
     while num_items(Items.Gold) == gold0:
@@ -110,19 +131,23 @@ def walk_left(direction, gold0, s):
         left = left_of(direction)
         right = right_of(direction)
 
-        if can_go(left, s):
-            move(left)
+        x = get_pos_x()
+        y = get_pos_y()
+
+        # Здесь intentionally НЕ делаем can_move() перед move().
+        # move() сам дешево вернёт False, если упёрлись в стену,
+        # а на успешном ходе не платим лишний tick за can_move().
+        if inside(left, x, y, s) and move(left):
             direction = left
-        elif can_go(direction, s):
-            move(direction)
-        elif can_go(right, s):
-            move(right)
+        elif inside(direction, x, y, s) and move(direction):
+            pass
+        elif inside(right, x, y, s) and move(right):
             direction = right
         else:
-            direction = back_of(direction)
+            back = back_of(direction)
 
-            if can_go(direction, s):
-                move(direction)
+            if inside(back, x, y, s) and move(back):
+                direction = back
             else:
                 return False
 
@@ -168,12 +193,14 @@ def place_drone_or_master(placed, total, gold0, s):
         return total
 
     drone = spawn_drone(
-        walk_left,
+        wait_maze_and_walk,
         direction_for(placed + 1),
         gold0,
         s
     )
 
+    # Если игра не дала spawned-дрона,
+    # текущая точка становится мастерской.
     if drone == None:
         return total
 
