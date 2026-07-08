@@ -1,46 +1,184 @@
-from __builtins__ import *
+from _farming import *
+from _movement import *
+from _util import *
 
 
-def make_flight_plan(p0: tuple[int, int], p1: tuple[int, int], ws: int) -> list[Direction]:
-    dx = (p1[0] - p0[0]) % ws
-    dy = (p1[1] - p0[1]) % ws
+def _plant_row(
+        length: int,
+        p0_target: tuple[int, int] | None = None,
+        p0_drone: tuple[int, int] | None = None,
+        world_size: int | None = None
+) -> tuple[list[int], tuple[int, int]] | None:
+    if length < 1:
+        quick_print("negative plant row length")
+        return None
 
-    if abs(dx) > ws // 2:
-        dx = (abs(dx) - ws) * ((dx > 0) - (dx < 0))
+    if p0_drone == None:
+        p0_drone = (get_pos_x(), get_pos_y())
 
-    if abs(dy) > ws // 2:
-        dy = (abs(dy) - ws) * ((dy > 0) - (dy < 0))
+    if world_size == None:
+        world_size = get_world_size()
 
-    plan = []
-    for _ in range(abs(dx)):
-        if dx > 0:
-            append(plan, East)
+    if p0_target == None:
+        p0_target = p0_drone
+
+    fly(p0_drone, p0_target, world_size)
+    sizes = []
+
+    for i in range(length):
+        if smart_plant(Entities.Cactus) != Entities.Cactus:
+            quick_print("was not able to plant cactus")
+            return None
+        append(sizes, measure())
+        if i != length - 1:
+            move(East)
+
+    return sizes, (p0_target[0] + length - 1, p0_target[1])
+
+
+def _sort_row(
+        data: list[int],
+        p0_target: tuple[int, int],
+        p0_drone: tuple[int, int],
+        world_size: int,
+) -> tuple[list[int], tuple[int, int]] | None:
+    length = len(data)
+    left = 0
+    right = length - 1
+    i = right
+    direction = -1
+
+    x0 = p0_target[0]
+    y0 = p0_target[1]
+    x = p0_drone[0]
+    y = p0_drone[1]
+
+    while left < right:
+        while left < i <= right:
+            if data[i] < data[i - 1]:
+                fly((x, y), (x0 + i, y0), world_size)
+                x = x0 + i
+                y = y0
+
+                tmp = data[i]
+                data[i] = data[i - 1]
+                data[i - 1] = tmp
+                swap(West)
+
+            i = i + direction
+
+        if direction < 0:
+            left += 1
+            direction = 1
+            i = left + 1
         else:
-            append(plan, West)
+            right -= 1
+            direction = -1
+            i = right
 
-    for _ in range(abs(dy)):
-        if dy > 0:
-            append(plan, North)
+    return data, (x, y)
+
+
+def _sort_column(
+        data: list[int],
+        p0_target: tuple[int, int],
+        p0_drone: tuple[int, int],
+        world_size: int,
+) -> tuple[list[int], tuple[int, int]] | None:
+    length = len(data)
+    left = 0
+    right = length - 1
+    i = right
+    direction = -1
+
+    x0 = p0_target[0]
+    y0 = p0_target[1]
+    x = p0_drone[0]
+    y = p0_drone[1]
+
+    while left < right:
+        while left < i <= right:
+            if data[i] < data[i - 1]:
+                fly((x, y), (x0, y0 + i), world_size)
+                x = x0
+                y = y0 + i
+
+                tmp = data[i]
+                data[i] = data[i - 1]
+                data[i - 1] = tmp
+                swap(South)
+
+            i = i + direction
+
+        if direction < 0:
+            left += 1
+            direction = 1
+            i = left + 1
         else:
-            append(plan, South)
+            right -= 1
+            direction = -1
+            i = right
 
-    return plan
+    return data, (x, y)
 
 
-# return moves made
-def fly(p0: tuple[int, int], p1: tuple[int, int], ws: int) -> int:
-    plan = make_flight_plan(p0, p1, ws)
-    for direction in plan:
-        move(direction)
-    return len(plan)
+def _plant_and_sort_row(
+        length: int,
+        p0_target: tuple[int, int] | None = None,
+        p0_drone: tuple[int, int] | None = None,
+        world_size: int | None = None
+) -> tuple[list[int], tuple[int, int]] | None:
+    plant_result = _plant_row(length, p0_target, p0_drone, world_size)
+    if plant_result == None:
+        return None
+    row, (x, y) = plant_result
+    return _sort_row(row, p0_target, (x, y), world_size)
+
+
+def cycle(x, y, w, h):
+    change_hat(Hats.Cactus_Hat)
+    world_size = get_world_size()
+    drone_p = get_pos_x(), get_pos_y()
+
+    drones = []
+    for i in range(h - 1):
+        # noinspection PyTypeChecker
+        append(drones, spawn_drone(_plant_and_sort_row, w, (x, y + i), drone_p, world_size))
+
+    last_row_result = _plant_and_sort_row(w, (x, y + h - 1), drone_p, world_size)
+    if last_row_result == None:
+        quick_print("master plant_and_sort_row failed")
+        return
+
+    rows = []
+    for drone in drones:
+        r = wait_for(drone)
+        if r == None:
+            quick_print("slave plant_and_sort_row failed")
+            return
+        append(rows, wait_for(drone)[0])
+    append(rows, last_row_result[0])
+
+    columns = transpose(rows)
+    drone_p = last_row_result[1]
+
+    for i in range(h - 1):
+        # noinspection PyTypeChecker
+        append(drones, spawn_drone(_sort_column, columns[i], (x + i, y), drone_p, world_size))
+
+    last_column_result = _sort_column(columns[h - 1], (x + w - 1, x), drone_p, world_size)
+    if last_column_result == None:
+        quick_print("master sort_column failed")
+        return
+
+    for drone in drones:
+        r = wait_for(drone)
+        if r == None:
+            quick_print("slave sort_column failed")
+            return
+
+    harvest()
 
 
 clear()
-change_hat(Hats.Brown_Hat)
-world_size = get_world_size()
-
-for i in range(10):
-    till()
-    plant(Entities.Cactus)
-    quick_print(measure())
-    fly((i, 0), (i + 1, 0), world_size)
+cycle(0, 0, 32, 32)
