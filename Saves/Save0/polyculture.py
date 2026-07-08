@@ -1,66 +1,13 @@
-from __builtins__ import *
-from helpers import fmt_item, fmt_number
-from farming import smart_plant
+from _farming import *
+from _movement import *
 
-clear()
-
-#     0 1 2 3
-#     _ _ _ _
-# 0 | x x x x
-# 1 | x x x x
-# 2 | x x x x
-# 3 | x x x x
-#
-def make_flight_plan(p0: tuple[int, int], p1: tuple[int, int], ws: int) -> list[Direction]:
-    dx = (p1[0] - p0[0]) % ws
-    dy = (p1[1] - p0[1]) % ws
-
-    if abs(dx) > ws // 2:
-        dx = (abs(dx) - ws) * ((dx > 0) - (dx < 0))
-
-    if abs(dy) > ws // 2:
-        dy = (abs(dy) - ws) * ((dy > 0) - (dy < 0))
-
-    plan = []
-    for _ in range(abs(dx)):
-        if dx > 0:
-            append(plan, East)
-        else:
-            append(plan, West)
-
-    for _ in range(abs(dy)):
-        if dy > 0:
-            append(plan, North)
-        else:
-            append(plan, South)
-
-    return plan
-
-
-# return moves made
-def fly(p0: tuple[int, int], p1: tuple[int, int], ws: int) -> int:
-    plan = make_flight_plan(p0, p1, ws)
-    for direction in plan:
-        move(direction)
-    return len(plan)
-
-
-def slave(flight_plan: list[Direction], target: Entity):
+def _slave(flight_plan: list[Direction], target: Entity):
     for direction in flight_plan:
         move(direction)
     return smart_plant(target)
 
 
-def master(x: int, y: int, target: Entity = Entities.Grass, debug_mode: bool = True) -> None:
-    start_time = get_time()
-    prev_time = start_time
-    start_items = {}
-
-    if debug_mode:
-        for item in Items:
-            # noinspection PyTypeChecker
-            start_items[item] = num_items(item)
-
+def _master(x: int, y: int, target: Entity = Entities.Grass) -> None:
     change_hat(Hats.Brown_Hat)
     x0 = get_pos_x()
     y0 = get_pos_y()
@@ -75,23 +22,6 @@ def master(x: int, y: int, target: Entity = Entities.Grass, debug_mode: bool = T
     plant_map = {}
 
     while True:
-        if debug_mode:
-            time = get_time()
-            if time - prev_time > 5:
-                prev_time = time
-                msg = {}
-                for item in Items:
-                    # noinspection PyTypeChecker
-                    q1 = num_items(item)
-                    q0 = start_items[item]
-                    dt = time - start_time
-
-                    if q0 != q1:
-                        # noinspection PyTypeChecker
-                        msg[fmt_item(item)] = fmt_number((q1 - q0) / dt * 60)
-
-                quick_print(msg)
-
         companion = get_companion()
         if companion == None:
             quick_print("companion was not found for ", target)
@@ -104,7 +34,7 @@ def master(x: int, y: int, target: Entity = Entities.Grass, debug_mode: bool = T
             if len(plan) <= radius:
                 while True:
                     # noinspection PyTypeChecker
-                    drone = spawn_drone(slave, plan, companion[0])
+                    drone = spawn_drone(_slave, plan, companion[0])
                     if drone != None:
                         break
 
@@ -124,19 +54,16 @@ def master(x: int, y: int, target: Entity = Entities.Grass, debug_mode: bool = T
         if target != Entities.Grass:
             plant(target)
 
-
-y = 4
+clear()
+y = 3
 for j in range(5):
     if j % 2 == 0:
-        x = 4
+        x = 3
     else:
         x = 0
 
     for i in range(4):
-        debug = False
-        if i == 0 and j == 0:
-            debug = True
         # noinspection PyTypeChecker
-        spawn_drone(master, x, y, Entities.Grass, debug)
-        x += 8
-    y += 4
+        spawn_drone(_master, x, y, Entities.Grass)
+        x += 7
+    y += 3
