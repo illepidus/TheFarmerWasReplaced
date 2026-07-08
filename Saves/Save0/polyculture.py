@@ -7,7 +7,7 @@ def _slave(flight_plan: list[Direction], target: Entity):
     return smart_plant(target)
 
 
-def _master(x: int, y: int, target: Entity = Entities.Grass) -> None:
+def cycle(x: int, y: int, target: Entity, until: tuple[Item, int] | None = None) -> None:
     change_hat(Hats.Brown_Hat)
     x0 = get_pos_x()
     y0 = get_pos_y()
@@ -22,6 +22,12 @@ def _master(x: int, y: int, target: Entity = Entities.Grass) -> None:
     plant_map = {}
 
     while True:
+        if until != None:
+            current = num_items(until[0])
+            if current >= until[1]:
+                break
+
+
         companion = get_companion()
         if companion == None:
             quick_print("companion was not found for ", target)
@@ -30,15 +36,13 @@ def _master(x: int, y: int, target: Entity = Entities.Grass) -> None:
         map_key = str(companion[1][0]) + "_" + str(companion[1][1])
         if map_key not in plant_map or plant_map[map_key] != companion[0]:
             plan = make_flight_plan((x, y), companion[1], world_size)
-            radius = 3
-            if len(plan) <= radius:
-                while True:
-                    # noinspection PyTypeChecker
-                    drone = spawn_drone(_slave, plan, companion[0])
-                    if drone != None:
-                        break
 
-                plant_map[map_key] = wait_for(drone)
+            while True:
+                # noinspection PyTypeChecker
+                drone = spawn_drone(_slave, plan, companion[0])
+                if drone != None:
+                    plant_map[map_key] = wait_for(drone)
+                    break
 
         while True:
             if can_harvest():
@@ -54,16 +58,15 @@ def _master(x: int, y: int, target: Entity = Entities.Grass) -> None:
         if target != Entities.Grass:
             plant(target)
 
-clear()
-y = 3
-for j in range(5):
-    if j % 2 == 0:
-        x = 3
-    else:
-        x = 0
-
-    for i in range(4):
-        # noinspection PyTypeChecker
-        spawn_drone(_master, x, y, Entities.Grass)
-        x += 7
-    y += 3
+# y = 3
+# for j in range(5):
+#     if j % 2 == 0:
+#         x = 3
+#     else:
+#         x = 0
+#
+#     for i in range(4):
+#         # noinspection PyTypeChecker
+#         spawn_drone(_master, x, y, Entities.Grass)
+#         x += 7
+#     y += 3
