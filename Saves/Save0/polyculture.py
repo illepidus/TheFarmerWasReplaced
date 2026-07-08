@@ -1,13 +1,14 @@
 from _farming import *
 from _movement import *
 
-def _slave(flight_plan: list[Direction], target: Entity):
+
+def _plant_companion(flight_plan: list[Direction], target: Entity):
     for direction in flight_plan:
         move(direction)
     return smart_plant(target)
 
 
-def cycle(x: int, y: int, target: Entity, until: tuple[Item, int] | None = None) -> None:
+def cycle(x: int, y: int, target: Entity, until: tuple[Item, int] | None = None, single_mode=False) -> None:
     change_hat(Hats.Brown_Hat)
     x0 = get_pos_x()
     y0 = get_pos_y()
@@ -27,7 +28,6 @@ def cycle(x: int, y: int, target: Entity, until: tuple[Item, int] | None = None)
             if current >= until[1]:
                 break
 
-
         companion = get_companion()
         if companion == None:
             quick_print("companion was not found for ", target)
@@ -37,12 +37,16 @@ def cycle(x: int, y: int, target: Entity, until: tuple[Item, int] | None = None)
         if map_key not in plant_map or plant_map[map_key] != companion[0]:
             plan = make_flight_plan((x, y), companion[1], world_size)
 
-            while True:
-                # noinspection PyTypeChecker
-                drone = spawn_drone(_slave, plan, companion[0])
-                if drone != None:
-                    plant_map[map_key] = wait_for(drone)
-                    break
+            if single_mode:
+                plant_map[map_key] = _plant_companion(plan, companion[0])
+                fly(companion[1], (x, y), world_size)
+            else:
+                while True:
+                    # noinspection PyTypeChecker
+                    drone = spawn_drone(_plant_companion, plan, companion[0])
+                    if drone != None:
+                        plant_map[map_key] = wait_for(drone)
+                        break
 
         while True:
             if can_harvest():
@@ -57,16 +61,3 @@ def cycle(x: int, y: int, target: Entity, until: tuple[Item, int] | None = None)
 
         if target != Entities.Grass:
             plant(target)
-
-# y = 3
-# for j in range(5):
-#     if j % 2 == 0:
-#         x = 3
-#     else:
-#         x = 0
-#
-#     for i in range(4):
-#         # noinspection PyTypeChecker
-#         spawn_drone(_master, x, y, Entities.Grass)
-#         x += 7
-#     y += 3

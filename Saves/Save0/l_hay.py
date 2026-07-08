@@ -9,6 +9,6 @@ for j in range(5):
 
     for i in range(4):
         # noinspection PyTypeChecker
-        spawn_drone(cycle, x, y, Entities.Grass, (Items.Hay, 2000000000))
+        spawn_drone(cycle, x, y, Entities.Grass, (Items.Hay, 2000000000), False)
         x += 7
     y += 3
