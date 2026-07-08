@@ -169,5 +169,5 @@ def cycle(x, y, w, h):
     harvest()
 
 
-clear()
-cycle(0, 0, 32, 32)
+while True:
+    cycle(0, 0, 32, 32)
