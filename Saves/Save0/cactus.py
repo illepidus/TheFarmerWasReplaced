@@ -36,11 +36,12 @@ def _plant_row(
     return sizes, (p0_target[0] + length - 1, p0_target[1])
 
 
-def _sort_row(
+def _sort_line(
         data: list[int],
         p0_target: tuple[int, int],
         p0_drone: tuple[int, int],
         world_size: int,
+        is_row: bool,
 ) -> tuple[list[int], tuple[int, int]] | None:
     length = len(data)
     left = 0
@@ -53,17 +54,30 @@ def _sort_row(
     x = p0_drone[0]
     y = p0_drone[1]
 
+    if is_row:
+        swap_direction = West
+    else:
+        swap_direction = South
+
     while left < right:
         while left < i <= right:
             if data[i] < data[i - 1]:
-                fly((x, y), (x0 + i, y0), world_size)
-                x = x0 + i
-                y = y0
+                if is_row:
+                    target_x = x0 + i
+                    target_y = y0
+                else:
+                    target_x = x0
+                    target_y = y0 + i
+
+                fly((x, y), (target_x, target_y), world_size)
+                x = target_x
+                y = target_y
 
                 tmp = data[i]
                 data[i] = data[i - 1]
                 data[i - 1] = tmp
-                swap(West)
+
+                swap(swap_direction)
 
             i = i + direction
 
@@ -77,6 +91,15 @@ def _sort_row(
             i = right
 
     return data, (x, y)
+
+
+def _sort_row(
+        data: list[int],
+        p0_target: tuple[int, int],
+        p0_drone: tuple[int, int],
+        world_size: int,
+) -> tuple[list[int], tuple[int, int]] | None:
+    return _sort_line(data, p0_target, p0_drone, world_size, True)
 
 
 def _sort_column(
@@ -85,41 +108,7 @@ def _sort_column(
         p0_drone: tuple[int, int],
         world_size: int,
 ) -> tuple[list[int], tuple[int, int]] | None:
-    length = len(data)
-    left = 0
-    right = length - 1
-    i = right
-    direction = -1
-
-    x0 = p0_target[0]
-    y0 = p0_target[1]
-    x = p0_drone[0]
-    y = p0_drone[1]
-
-    while left < right:
-        while left < i <= right:
-            if data[i] < data[i - 1]:
-                fly((x, y), (x0, y0 + i), world_size)
-                x = x0
-                y = y0 + i
-
-                tmp = data[i]
-                data[i] = data[i - 1]
-                data[i - 1] = tmp
-                swap(South)
-
-            i = i + direction
-
-        if direction < 0:
-            left += 1
-            direction = 1
-            i = left + 1
-        else:
-            right -= 1
-            direction = -1
-            i = right
-
-    return data, (x, y)
+    return _sort_line(data, p0_target, p0_drone, world_size, False)
 
 
 def _plant_and_sort_row(
