@@ -6,7 +6,7 @@ Themes
 **/*.iml
 **/*.vdf
 Saves/**/save.json
-Saves/**/f*.py
+Saves/**/f[0-9].py
 
 options.txt
 output.txt

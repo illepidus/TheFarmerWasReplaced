@@ -1,6 +1,13 @@
 from __builtins__ import *
 
 
+#     0 1 2 3
+#     _ _ _ _
+# 0 | x x x x
+# 1 | x x x x
+# 2 | x x x x
+# 3 | x x x x
+#
 def make_flight_plan(p0: tuple[int, int], p1: tuple[int, int], ws: int) -> list[Direction]:
     dx = (p1[0] - p0[0]) % ws
     dy = (p1[1] - p0[1]) % ws
@@ -33,14 +40,3 @@ def fly(p0: tuple[int, int], p1: tuple[int, int], ws: int) -> int:
     for direction in plan:
         move(direction)
     return len(plan)
-
-
-clear()
-change_hat(Hats.Brown_Hat)
-world_size = get_world_size()
-
-for i in range(10):
-    till()
-    plant(Entities.Cactus)
-    quick_print(measure())
-    fly((i, 0), (i + 1, 0), world_size)

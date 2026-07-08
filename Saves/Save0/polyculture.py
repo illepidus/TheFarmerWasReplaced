@@ -1,31 +1,8 @@
 from __builtins__ import *
 from helpers import fmt_item, fmt_number
+from farming import smart_plant
 
 clear()
-# returns False if not succeed
-def smart_plant(target: Entity) -> Entity | None:
-    entity = get_entity_type()
-
-    if entity == target:
-        return target
-
-    if entity != None:
-        harvest()
-
-    ground = get_ground_type()
-
-    if target == Entities.Grass:
-        if ground == Grounds.Soil:
-            till()
-        return target
-    else:
-        if ground == Grounds.Grassland:
-            till()
-        if plant(target):
-            return target
-        else:
-            return get_entity_type()
-
 
 #     0 1 2 3
 #     _ _ _ _
@@ -160,6 +137,6 @@ for j in range(5):
         if i == 0 and j == 0:
             debug = True
         # noinspection PyTypeChecker
-        spawn_drone(master, x, y, Entities.Carrot, debug)
+        spawn_drone(master, x, y, Entities.Grass, debug)
         x += 8
     y += 4
