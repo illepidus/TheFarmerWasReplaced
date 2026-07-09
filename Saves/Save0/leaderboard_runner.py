@@ -1,6 +1,16 @@
 from __builtins__ import *
 
-# leaderboard_run(Leaderboards.Hay, "l_hay", 64)
-# leaderboard_run(Leaderboards.Hay_Single, "l_hay_single", 64)
-leaderboard_run(Leaderboards.Wood, "l_wood", 64)
-# leaderboard_run(Leaderboards.Wood_Single, "l_wood_single", 64)
+_PROGRAMS = {
+    Leaderboards.Hay: "l_hay",  # 04:16.888
+    Leaderboards.Hay_Single: "l_hay_single",  # submitted 04:32.809
+    Leaderboards.Wood: "l_wood",
+    Leaderboards.Wood_Single: "l_wood_single"  # submitted 48:41.783
+}
+
+
+def run(leaderboard: Leaderboard):
+    global _PROGRAMS
+    leaderboard_run(leaderboard, _PROGRAMS[leaderboard], 16)
+
+
+run(Leaderboards.Wood)

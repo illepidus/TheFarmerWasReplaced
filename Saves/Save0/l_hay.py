@@ -1,4 +1,5 @@
-from polyculture import *
+from __builtins__ import *
+from polyculture import cycle
 
 _ = Leaderboards.Hay
 
