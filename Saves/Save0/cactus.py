@@ -125,7 +125,6 @@ def _plant_and_sort_row(
 
 
 def cycle(x, y, w, h):
-    change_hat(Hats.Cactus_Hat)
     world_size = get_world_size()
     drone_p = get_pos_x(), get_pos_y()
 
@@ -167,7 +166,3 @@ def cycle(x, y, w, h):
             return
 
     harvest()
-
-
-while True:
-    cycle(0, 0, 32, 32)
