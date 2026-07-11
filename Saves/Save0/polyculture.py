@@ -35,7 +35,7 @@ def cycle(x: int, y: int, target: Entity, until: tuple[Item, int] | None = None,
 
         map_key = str(companion[1][0]) + "_" + str(companion[1][1])
         if map_key not in plant_map or plant_map[map_key] != companion[0]:
-            plan = make_flight_plan((x, y), companion[1], world_size)
+            plan = make_flight_plan(companion[1], (x, y), world_size)
 
             if single_mode:
                 plant_map[map_key] = _plant_companion(plan, companion[0])

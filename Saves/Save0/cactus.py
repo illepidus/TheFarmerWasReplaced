@@ -22,7 +22,7 @@ def _plant_row(
     if p0_target == None:
         p0_target = p0_drone
 
-    fly(p0_drone, p0_target, world_size)
+    fly(p0_target, p0_drone, world_size)
     sizes = []
 
     for i in range(length):
@@ -69,7 +69,7 @@ def _sort_line(
                     target_x = x0
                     target_y = y0 + i
 
-                fly((x, y), (target_x, target_y), world_size)
+                fly((target_x, target_y), (x, y), world_size)
                 x = target_x
                 y = target_y
 

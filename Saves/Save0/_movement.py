@@ -8,9 +8,18 @@ from __builtins__ import *
 # 2 | x x x x
 # 3 | x x x x
 #
-def make_flight_plan(p0: tuple[int, int], p1: tuple[int, int], ws: int) -> list[Direction]:
-    dx = (p1[0] - p0[0]) % ws
-    dy = (p1[1] - p0[1]) % ws
+def make_flight_plan(
+        dest: tuple[int, int],
+        orig: tuple[int, int] | None = None,
+        ws: int | None = None
+) -> list[Direction]:
+    if orig == None:
+        orig = (get_pos_x(), get_pos_y())
+    if ws == None:
+        ws = get_world_size()
+
+    dx = (dest[0] - orig[0]) % ws
+    dy = (dest[1] - orig[1]) % ws
 
     if abs(dx) > ws // 2:
         dx = (abs(dx) - ws) * ((dx > 0) - (dx < 0))
@@ -35,8 +44,18 @@ def make_flight_plan(p0: tuple[int, int], p1: tuple[int, int], ws: int) -> list[
 
 
 # return moves made
-def fly(p0: tuple[int, int], p1: tuple[int, int], ws: int) -> int:
-    plan = make_flight_plan(p0, p1, ws)
+def fly(
+        dest: tuple[int, int],
+        orig: tuple[int, int] | None = None,
+        ws: int | None = None
+) -> int:
+    if orig == None:
+        orig = (get_pos_x(), get_pos_y())
+    if ws == None:
+        ws = get_world_size()
+
+    plan = make_flight_plan(dest, orig, ws)
     for direction in plan:
         move(direction)
+
     return len(plan)
