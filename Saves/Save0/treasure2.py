@@ -58,9 +58,7 @@ def cycle(p: tuple[int, int], left_wall: bool) -> None:
             spawn_maze()
         direction = walk(direction)
 
-
 clear()
-set_world_size(20)
 ws = get_world_size()
 
 for i in range(max_drones() - 1):
