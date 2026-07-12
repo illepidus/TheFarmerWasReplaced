@@ -1,40 +1,5 @@
 from _movement import *
 
-
-def walk_left(direction: Direction) -> Direction:
-    left = left_of(direction)
-    if move(left):
-        return left
-
-    if move(direction):
-        return direction
-
-    right = right_of(direction)
-    if move(right):
-        return right
-
-    back = back_of(direction)
-    move(back)
-    return back
-
-
-def walk_right(direction: Direction) -> Direction:
-    right = right_of(direction)
-    if move(right):
-        return right
-
-    if move(direction):
-        return direction
-
-    left = left_of(direction)
-    if move(left):
-        return left
-
-    back = back_of(direction)
-    move(back)
-    return back
-
-
 def spawn_maze() -> None:
     if get_entity_type() == Entities.Treasure:
         harvest()
@@ -43,15 +8,15 @@ def spawn_maze() -> None:
     use_item(Items.Weird_Substance, substance)
 
 
-def cycle(p: tuple[int, int], left_wall: bool) -> None:
+def cycle(p: tuple[int, int], do_left_cycle: bool) -> None:
     fly(p)
     change_hat(Hats.Top_Hat)
     direction = North
 
-    if left_wall:
-        walk = walk_left
+    if do_left_cycle:
+        walk = fly_left
     else:
-        walk = walk_right
+        walk = fly_right
 
     while True:
         if get_entity_type() == Entities.Treasure:

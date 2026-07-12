@@ -1,5 +1,6 @@
 from _movement import *
 
+
 def cycle(p: tuple[int, int], substance) -> None:
     fly(p)
     while True:

@@ -61,6 +61,39 @@ def fly(
     return len(plan)
 
 
+def fly_left(direction: Direction) -> Direction:
+    left = left_of(direction)
+    if move(left):
+        return left
+
+    if move(direction):
+        return direction
+
+    right = right_of(direction)
+    if move(right):
+        return right
+
+    back = back_of(direction)
+    move(back)
+    return back
+
+
+def fly_right(direction: Direction) -> Direction:
+    right = right_of(direction)
+    if move(right):
+        return right
+
+    if move(direction):
+        return direction
+
+    left = left_of(direction)
+    if move(left):
+        return left
+
+    back = back_of(direction)
+    move(back)
+    return back
+
 def left_of(d):
     if d == North:
         return West
