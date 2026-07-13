@@ -1,0 +1,17 @@
+from __builtins__ import *
+from polyculture import cycle
+
+_ = Leaderboards.Hay
+
+y = 3
+for j in range(5):
+    if j % 2 == 0:
+        x = 3
+    else:
+        x = 0
+
+    for i in range(4):
+        # noinspection PyTypeChecker
+        spawn_drone(cycle, x, y, Entities.Grass, (Items.Hay, 2000000000), False)
+        x += 7
+    y += 3
