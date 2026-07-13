@@ -28,6 +28,7 @@ def _init(p0, size):
         move(direction)
     _plant()
 
+
 def _first_run(p0, size):
     queue = list()
     for i in range(size):
@@ -49,7 +50,6 @@ def _first_run(p0, size):
 
 
 def cycle(x0=0, y0=0, s=6):
-    change_hat(Hats.Pumpkin_Hat)
     _init((x0, y0), s)
     queue = _first_run((x0, y0), s)
 
