@@ -198,7 +198,19 @@ def execute():
             move(North)
 
     clear()
-    while num_items(Items.Carrot) < 3000:
+    while num_items(Items.Hay) < 19200:
         balanced6()
-    unlock_or_throw(Unlocks.Pumpkins)
-    unlock_or_throw(Unlocks.Fertilizer)
+    unlock_or_throw(Unlocks.Trees) # trees_5
+
+    while num_items(Items.Wood) < 12800:
+        balanced6()
+    unlock_or_throw(Unlocks.Watering) # watering_5
+
+    while num_items(Items.Carrot) < 4000:
+        balanced6()
+
+    unlock_or_throw(Unlocks.Pumpkins) # pumpkins_1
+    unlock_or_throw(Unlocks.Pumpkins) # pumpkins_2
+    unlock_or_throw(Unlocks.Fertilizer) # fertilizer_1
+    unlock_or_throw(Unlocks.Fertilizer) # fertilizer_2
+    unlock_or_throw(Unlocks.Fertilizer) # fertilizer_3
