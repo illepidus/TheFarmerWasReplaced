@@ -118,7 +118,7 @@ def execute():
     unlock_or_throw(Unlocks.Trees)  # trees_3
     unlock_or_throw(Unlocks.Grass)  # grass_4
 
-    while num_items(Items.Wood) < 5000:
+    while num_items(Items.Wood) < 5200:
         wood_hay6()
     unlock_or_throw(Unlocks.Watering)  # watering_3
     unlock_or_throw(Unlocks.Carrots)  # carrots_3
@@ -184,7 +184,7 @@ def execute():
             for j in range(6):
                 if can_harvest():
                     harvest()
-                    if (i * 6 + j) > 30:
+                    if (i * 6 + j) > 25:
                         if get_ground_type() == Grounds.Grassland:
                             till()
                         plant(Entities.Carrot)
@@ -198,6 +198,7 @@ def execute():
             move(North)
 
     clear()
-    while num_items(Items.Power) < 100 or num_items(Items.Carrot) < 200:
+    while num_items(Items.Carrot) < 3000:
         balanced6()
     unlock_or_throw(Unlocks.Pumpkins)
+    unlock_or_throw(Unlocks.Fertilizer)
