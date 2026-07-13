@@ -43,6 +43,34 @@ def make_flight_plan(
     return plan
 
 
+def make_brush_flight_plan(
+        dest: tuple[int, int],
+        orig: tuple[int, int] | None = None,
+        ws: int | None = None
+) -> list[Direction]:
+    if orig == None:
+        orig = (get_pos_x(), get_pos_y())
+    if ws == None:
+        ws = get_world_size()
+
+    dx = (dest[0] - orig[0]) % ws
+    dy = (dest[1] - orig[1]) % ws
+
+    if abs(dx) > ws // 2:
+        dx = (abs(dx) - ws) * ((dx > 0) - (dx < 0))
+
+    if abs(dy) > ws // 2:
+        dy = (abs(dy) - ws) * ((dy > 0) - (dy < 0))
+
+    plan = []
+    for _ in range(abs(dx)):
+        if dx > 0:
+            append(plan, East)
+        else:
+            append(plan, West)
+
+    return plan
+
 # return moves made
 def fly(
         dest: tuple[int, int],
@@ -94,7 +122,8 @@ def fly_right(direction: Direction) -> Direction:
     move(back)
     return back
 
-def left_of(d):
+
+def left_of(d: Direction) -> Direction:
     if d == North:
         return West
     if d == West:
@@ -104,7 +133,7 @@ def left_of(d):
     return North
 
 
-def right_of(d):
+def right_of(d: Direction) -> Direction:
     if d == North:
         return East
     if d == East:
@@ -114,7 +143,7 @@ def right_of(d):
     return North
 
 
-def back_of(d):
+def back_of(d: Direction) -> Direction:
     if d == North:
         return South
     if d == South:

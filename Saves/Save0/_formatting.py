@@ -1,6 +1,5 @@
 from __builtins__ import *
 
-
 def fmt_item(e: Entity) -> string:
     return str(e)[6:]
 

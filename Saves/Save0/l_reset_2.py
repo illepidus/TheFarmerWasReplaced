@@ -1,6 +1,8 @@
-from l_reset_global import *
-import pumpkin_single
 import polyculture
+import pumpkin_single
+
+from l_reset_global import *
+
 
 def execute():
     clear()

@@ -1,5 +1,3 @@
-# full screen dino snake with single drone
-
 from __builtins__ import *
 
 
@@ -42,5 +40,6 @@ def cycle(size=get_world_size()):
             change_hat(Hats.Gray_Hat)
             return
 
+
 while True:
-    cycle()
+    cycle(6)

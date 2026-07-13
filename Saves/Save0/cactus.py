@@ -124,45 +124,59 @@ def _plant_and_sort_row(
     return _sort_row(row, p0_target, (x, y), world_size)
 
 
-def cycle(x, y, w, h):
+def cycle(x, y, w, h, single_mode=False):
     world_size = get_world_size()
     drone_p = get_pos_x(), get_pos_y()
 
-    drones = []
-    for i in range(h - 1):
-        # noinspection PyTypeChecker
-        append(drones, spawn_drone(_plant_and_sort_row, w, (x, y + i), drone_p, world_size))
+    if single_mode:
+        rows = []
+        for i in range(h):
+            _res = _plant_and_sort_row(w, (x, y + i), drone_p, world_size)
+            rows.append(_res[0])
+            drone_p = _res[1]
 
-    last_row_result = _plant_and_sort_row(w, (x, y + h - 1), drone_p, world_size)
-    if last_row_result == None:
-        quick_print("master plant_and_sort_row failed")
-        return
+        columns = transpose(rows)
 
-    rows = []
-    for drone in drones:
-        r = wait_for(drone)
-        if r == None:
-            quick_print("slave plant_and_sort_row failed")
+        for i in range(w):
+            _res = _sort_column(columns[i], (x + i, y), drone_p, world_size)
+            drone_p = _res[1]
+    else:
+        drones = []
+        for i in range(h - 1):
+            # noinspection PyTypeChecker
+            append(drones, spawn_drone(_plant_and_sort_row, w, (x, y + i), drone_p, world_size))
+
+        last_row_result = _plant_and_sort_row(w, (x, y + h - 1), drone_p, world_size)
+        if last_row_result == None:
+            quick_print("master plant_and_sort_row failed")
             return
-        append(rows, wait_for(drone)[0])
-    append(rows, last_row_result[0])
 
-    columns = transpose(rows)
-    drone_p = last_row_result[1]
 
-    for i in range(h - 1):
-        # noinspection PyTypeChecker
-        append(drones, spawn_drone(_sort_column, columns[i], (x + i, y), drone_p, world_size))
+        rows = []
+        for drone in drones:
+            r = wait_for(drone)
+            if r == None:
+                quick_print("slave plant_and_sort_row failed")
+                return
+            append(rows, wait_for(drone)[0])
+        append(rows, last_row_result[0])
 
-    last_column_result = _sort_column(columns[h - 1], (x + w - 1, x), drone_p, world_size)
-    if last_column_result == None:
-        quick_print("master sort_column failed")
-        return
+        columns = transpose(rows)
+        drone_p = last_row_result[1]
 
-    for drone in drones:
-        r = wait_for(drone)
-        if r == None:
-            quick_print("slave sort_column failed")
+        for i in range(w - 1):
+            # noinspection PyTypeChecker
+            append(drones, spawn_drone(_sort_column, columns[i], (x + i, y), drone_p, world_size))
+
+        last_column_result = _sort_column(columns[h - 1], (x + w - 1, x), drone_p, world_size)
+        if last_column_result == None:
+            quick_print("master sort_column failed")
             return
+
+        for drone in drones:
+            r = wait_for(drone)
+            if r == None:
+                quick_print("slave sort_column failed")
+                return
 
     harvest()

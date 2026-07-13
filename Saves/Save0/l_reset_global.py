@@ -1,6 +1,6 @@
-from __builtins__ import *
+from _formatting import *
 
-_T0_ = get_time()
+_RUN_START_TIME_ = get_time()
 
 
 def infinite_loop():
@@ -22,6 +22,6 @@ def unlock_or_throw(u):
     cost = get_cost(u, lvl)
 
     if unlock(u):
-        quick_print(get_time() - _T0_, "Unlocked", u, "lvl", lvl + 1, "for", cost)
+        quick_print(get_time() - _RUN_START_TIME_, "Unlocked", u, "lvl", lvl + 1, "for", cost)
     else:
         throw_exception("Was not able to unlock " + str(u) + " lvl " + str(lvl + 1) + " for " + str(cost))
