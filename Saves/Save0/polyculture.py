@@ -12,7 +12,7 @@ def cycle(x: int, y: int, target: Entity, until: tuple[Item, int] | None = None,
     x0 = get_pos_x()
     y0 = get_pos_y()
     world_size = get_world_size()
-    fly((x0, y0), (x, y), world_size)
+    fly((x, y), (x0, y0), world_size)
 
     initial_plant = smart_plant(target)
     if initial_plant != target:
@@ -41,7 +41,7 @@ def cycle(x: int, y: int, target: Entity, until: tuple[Item, int] | None = None,
 
             if single_mode:
                 plant_map[map_key] = _plant_companion(plan, companion[0])
-                fly(companion[1], (x, y), world_size)
+                fly((x, y), companion[1], world_size)
             else:
                 while True:
                     # noinspection PyTypeChecker

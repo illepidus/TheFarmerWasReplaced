@@ -16,6 +16,9 @@ def execute():
     polyculture.cycle(3,3, Entities.Grass, (Items.Hay, 76800), True)
     unlock_or_throw(Unlocks.Trees) # trees_6
 
+    polyculture.cycle(3,3, Entities.Tree, (Items.Wood, 54000), True)
+    unlock_or_throw(Unlocks.Fertilizer) # fertilizer_4
+
     polyculture.cycle(3,3, Entities.Tree, (Items.Wood, 31200), True)
     unlock_or_throw(Unlocks.Carrots) # carrots_5
 
