@@ -9,7 +9,6 @@ def _plant_companion(flight_plan: list[Direction], target: Entity):
 
 
 def cycle(x: int, y: int, target: Entity, until: tuple[Item, int] | None = None, single_mode=False) -> None:
-    change_hat(Hats.Brown_Hat)
     x0 = get_pos_x()
     y0 = get_pos_y()
     world_size = get_world_size()
@@ -30,7 +29,10 @@ def cycle(x: int, y: int, target: Entity, until: tuple[Item, int] | None = None,
 
         companion = get_companion()
         if companion == None:
-            quick_print("companion was not found for ", target)
+            quick_print(
+                "companion was not found for", target,
+                "standing on", get_ground_type(),
+                "with", get_entity_type(), "planed")
             return
 
         map_key = str(companion[1][0]) + "_" + str(companion[1][1])

@@ -10,6 +10,7 @@ def infinite_loop():
 
 def throw_exception(text: string):
     quick_print("exception:", text)
+    do_a_flip()
     _ = 0 / 0
 
 
