@@ -1,5 +1,8 @@
 import polyculture
 import pumpkin_single
+import treasure_single
+import cactus
+
 
 from l_reset_global import *
 
@@ -26,5 +29,21 @@ def execute():
 
     polyculture.cycle(3,3, Entities.Tree, (Items.Wood, 51200), True)
     unlock_or_throw(Unlocks.Watering) # watering_6
+
+    polyculture.cycle(3,3, Entities.Tree, (Items.Weird_Substance, 1000), True)
+    unlock_or_throw(Unlocks.Mazes) # mazes_1
+
+    clear()
+    treasure_single.cycle(0, 0, 8, 2000)
+    unlock_or_throw(Unlocks.Megafarm) # megafarm_1
+
+    polyculture.cycle(3,3, Entities.Tree, (Items.Carrot, 5000), False)
+    unlock_or_throw(Unlocks.Pumpkins) # pumpkins_3
+
+    while num_items(Items.Pumpkin) < 1000:
+        pumpkin_single.cycle(0, 0, 6)
+
+    cactus.cycle(0, 0, 8, 8, True)
+
 
     infinite_loop()
