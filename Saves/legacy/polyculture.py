@@ -58,7 +58,8 @@ def cycle(x: int, y: int, target: Entity, until: tuple[Item, int] | None = None,
                 if get_water() < .75:
                     use_item(Items.Water)
                 else:
-                    use_item(Items.Fertilizer)
+                    if num_items(Items.Fertilizer) > 1:
+                        use_item(Items.Fertilizer)
 
         if target != Entities.Grass:
             plant(target)

@@ -95,6 +95,29 @@ def execute():
     clear()
     spawn_drone(polyculture.cycle, 8, 8, Entities.Tree, (Items.Wood, 800000), True)
     polyculture.cycle(3, 3, Entities.Tree, (Items.Wood, 800000), True)
-    unlock_or_throw(Unlocks.Carrots) # carrots_7
+    unlock_or_throw(Unlocks.Carrots)  # carrots_7
+
+    clear()
+    spawn_drone(polyculture.cycle, 8, 8, Entities.Carrot, (Items.Carrot, 325000), True)
+    polyculture.cycle(3, 3, Entities.Carrot, (Items.Carrot, 325000), True)
+    unlock_or_throw(Unlocks.Pumpkins)  # pumpkins_7
+
+    clear()
+    spawn_drone(pumpkin_until, 6, 6, 64000)
+    pumpkin_until(0, 0, 64000)
+    unlock_or_throw(Unlocks.Expand)  # expand_7
+
+    clear()
+    spawn_drone(pumpkin_until, 0, 0, 130000)
+    spawn_drone(pumpkin_until, 7, 0, 130000)
+    spawn_drone(pumpkin_until, 0, 7, 130000)
+    spawn_drone(pumpkin_until, 7, 7, 130000)
+    pumpkin_until(7, 7, 130000)
+    unlock_or_throw(Unlocks.Cactus)  # cactus_3
+
+    clear()
+    cactus.cycle(0, 0, 16, 16, True)
+    unlock_or_throw(Unlocks.Mazes)  # mazes_3
+    unlock_or_throw(Unlocks.Dinosaurs)  # dinosaurs_3
 
     infinite_loop()

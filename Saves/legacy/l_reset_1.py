@@ -144,7 +144,7 @@ def execute():
 
     clear()
     till_6()
-    while num_items(Items.Carrot) < 500:
+    while num_items(Items.Carrot) < 510:
         carrot6()
     unlock_or_throw(Unlocks.Speed)  # speed_4
 
