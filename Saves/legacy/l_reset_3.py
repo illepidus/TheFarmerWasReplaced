@@ -31,6 +31,6 @@ def execute():
     set_world_size(12)
     bone_single.cycle()
     unlock_or_throw(Unlocks.Polyculture)  # polyculture_3
-
+    set_world_size(16)
 
     infinite_loop()
