@@ -119,5 +119,3 @@ def execute():
     cactus.cycle(0, 0, 16, 16, True)
     unlock_or_throw(Unlocks.Mazes)  # mazes_3
     unlock_or_throw(Unlocks.Dinosaurs)  # dinosaurs_3
-
-    infinite_loop()

@@ -30,23 +30,29 @@ def scout():
     return sequence
 
 
-def cycle(i: int, j: int, maze_size: int, target_gold: int | None = None):
+def cycle(i: int, j: int, maze_size: int, target_gold: int | None = None, flips: int = 0):
     fly((i * maze_size + maze_size // 2, j * maze_size + maze_size // 2))
 
-    spawn_maze(maze_size)
-    sequence = scout()
+    for _ in range(flips):
+        do_a_flip()
 
-    done = False
-    while not done:
+    while True:
+        done = False
+        fly((i * maze_size + maze_size // 2, j * maze_size + maze_size // 2))
+        spawn_maze(maze_size)
+        sequence = scout()
         found = 0
-        for entry in sequence:
-            if get_entity_type() == Entities.Treasure:
-                if found < 300:
-                    collect_and_keep_maze(maze_size)
-                    found += 1
-                else:
-                    done = True
-                    harvest()
-                if target_gold != None and num_items(Items.Gold) >= target_gold:
-                    return
-            move(entry[0])
+
+        while not done:
+            for entry in sequence:
+                if get_entity_type() == Entities.Treasure:
+                    if found < 300:
+                        collect_and_keep_maze(maze_size)
+                        found += 1
+                    else:
+                        found = 0
+                        done = True
+                        harvest()
+                    if target_gold != None and num_items(Items.Gold) >= target_gold:
+                        return
+                move(entry[0])
