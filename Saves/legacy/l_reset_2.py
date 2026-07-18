@@ -3,6 +3,7 @@ import pumpkin_single
 import treasure_single
 import cactus
 import bone_single
+import sunflower
 
 from l_reset_global import *
 

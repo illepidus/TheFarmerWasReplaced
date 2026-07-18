@@ -1,5 +1,5 @@
 from l_reset_global import *
-
+import sunflower
 
 def execute():
     while num_items(Items.Hay) < 20:
@@ -219,6 +219,13 @@ def execute():
     while num_items(Items.Wood) < 12800:
         balanced6()
     # unlock_or_throw(Unlocks.Watering) # watering_5
+
+    while num_items(Items.Carrot) < 500:
+        balanced6()
+
+    clear()
+    sunflower.cycle(2000)
+    clear()
 
     while num_items(Items.Carrot) < 4000:
         balanced6()

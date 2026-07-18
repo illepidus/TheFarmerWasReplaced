@@ -1,18 +1,46 @@
-from __builtins__ import *
-import move
-import water
+from _farming import *
+from _movement import *
 
 
-def cycle(x0=0, y0=0, s=min(8, get_world_size())):
-    change_hat(Hats.Sunflower_Hat)
-    for x in range(s):
-        for y in range(s):
-            move.to(x + x0, y + y0)
+def plant_and_scout() -> dict[int, list[tuple[int, int]]]:
+    ws = get_world_size()
+    fly((0, 0))
 
-            if get_ground_type() != Grounds.Soil:
-                till()
-            if get_entity_type() != Entities.Sunflower or can_harvest():
-                harvest()
-                plant(Entities.Sunflower)
+    data = {7: [], 8: [], 9: [], 10: [], 11: [], 12: [], 13: [], 14: [], 15: []}
+    for j in range(ws):
+        for i in range(ws):
+            smart_plant(Entities.Sunflower)
+            m = measure()
+            if m in data:
+                append(data[m], (i, j))
             else:
-                water.apply()
+                data[m] = [(i, j)]
+            if m < 10 and get_water() < 0.5:
+                use_item(Items.Water, 2)
+            move(East)
+        move(North)
+
+    return data
+
+
+def cycle(until: int | None = None):
+    finished = False
+
+    if until != None:
+        if num_items(Items.Power) >= until:
+            finished = True
+
+    while not finished:
+        if until != None:
+            if num_items(Items.Power) >= until:
+                finished = True
+
+        data = plant_and_scout()
+
+        for petals in data:
+            for coord in data[petals]:
+                fly(coord)
+                while not can_harvest():
+                    if get_water() < 0.75:
+                        use_item(Items.Water)
+                harvest()

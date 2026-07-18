@@ -54,5 +54,6 @@ def cycle(i: int, j: int, maze_size: int, target_gold: int | None = None, flips:
                         done = True
                         harvest()
                     if target_gold != None and num_items(Items.Gold) >= target_gold:
+                        quick_print("DONE", target_gold, num_items(Items.Gold))
                         return
                 move(entry[0])
