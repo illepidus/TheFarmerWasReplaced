@@ -93,8 +93,8 @@ def execute():
     unlock_or_throw(Unlocks.Megafarm)  # megafarm_2
 
     clear()
-    spawn_drone(polyculture.cycle, 8, 8, Entities.Tree, (Items.Wood, 1560000), True)
-    polyculture.cycle(3, 3, Entities.Tree, (Items.Wood, 785000), True)
+    spawn_drone(polyculture.cycle, 8, 8, Entities.Tree, (Items.Wood, 800000), True)
+    polyculture.cycle(3, 3, Entities.Tree, (Items.Wood, 800000), True)
     unlock_or_throw(Unlocks.Carrots) # carrots_7
 
     infinite_loop()
