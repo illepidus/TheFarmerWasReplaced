@@ -1,5 +1,6 @@
 from l_reset_global import *
 
+
 def execute():
     while num_items(Items.Hay) < 20:
         harvest()
@@ -103,6 +104,7 @@ def execute():
     unlock_or_throw(Unlocks.Expand)  # expand_4
 
     clear()
+
     def wood_hay6():
         for i in range(6):
             for j in range(6):
@@ -158,26 +160,26 @@ def execute():
                     harvest()
                 move(East)
         move(North)
-    unlock_or_throw(Unlocks.Trees) # trees_4
+    unlock_or_throw(Unlocks.Trees)  # trees_4
 
     while num_items(Items.Wood) < 3200:
         wood_hay6()
-    unlock_or_throw(Unlocks.Watering) # watering_4
+    unlock_or_throw(Unlocks.Watering)  # watering_4
 
     while num_items(Items.Wood) < 12500:
         wood_hay6()
-    unlock_or_throw(Unlocks.Grass) # grass_6
+    unlock_or_throw(Unlocks.Grass)  # grass_5
 
     while num_items(Items.Wood) < 7500:
         wood_hay6()
-    unlock_or_throw(Unlocks.Carrots) # carrots_4
-    unlock_or_throw(Unlocks.Hats) # hats_1
+    unlock_or_throw(Unlocks.Carrots)  # carrots_4
+    unlock_or_throw(Unlocks.Hats)  # hats_1
 
     clear()
     till_6()
     while num_items(Items.Carrot) < 700:
         carrot6()
-    unlock_or_throw(Unlocks.Sunflowers) # sunflowers_1
+    unlock_or_throw(Unlocks.Sunflowers)  # sunflowers_1
 
     def balanced6():
         for i in range(6):
@@ -200,26 +202,26 @@ def execute():
     clear()
     while num_items(Items.Hay) < 19200:
         balanced6()
-    unlock_or_throw(Unlocks.Trees) # trees_5
+    unlock_or_throw(Unlocks.Trees)  # trees_5
 
     while num_items(Items.Wood) < 500:
         balanced6()
-    unlock_or_throw(Unlocks.Fertilizer) # fertilizer_1
+    unlock_or_throw(Unlocks.Fertilizer)  # fertilizer_1
 
     while num_items(Items.Wood) < 1500:
         balanced6()
-    unlock_or_throw(Unlocks.Fertilizer) # fertilizer_2
+    unlock_or_throw(Unlocks.Fertilizer)  # fertilizer_2
 
     while num_items(Items.Wood) < 9000:
         balanced6()
-    unlock_or_throw(Unlocks.Fertilizer) # fertilizer_3
+    unlock_or_throw(Unlocks.Fertilizer)  # fertilizer_3
 
     while num_items(Items.Wood) < 12800:
         balanced6()
-    #unlock_or_throw(Unlocks.Watering) # watering_5
+    # unlock_or_throw(Unlocks.Watering) # watering_5
 
     while num_items(Items.Carrot) < 4000:
         balanced6()
 
-    unlock_or_throw(Unlocks.Pumpkins) # pumpkins_1
-    unlock_or_throw(Unlocks.Pumpkins) # pumpkins_2
+    unlock_or_throw(Unlocks.Pumpkins)  # pumpkins_1
+    unlock_or_throw(Unlocks.Pumpkins)  # pumpkins_2

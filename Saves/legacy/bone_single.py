@@ -39,7 +39,3 @@ def cycle(size=get_world_size()):
         if i < size ** 2:
             change_hat(Hats.Gray_Hat)
             return
-
-
-while True:
-    cycle(6)
